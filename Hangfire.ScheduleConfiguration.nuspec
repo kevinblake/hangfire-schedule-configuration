@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Hangfire.ScheduleConfiguration</id>
+    <version>1.0</version>
+    <title>Hangfire Schedule Configuration</title>
+    <authors>Kevin Blake</authors>
+    <owners>Kevin Blake</owners>
+    <licenseUrl>https://raw.githubusercontent.com/kevinblake/hangfire-schedule-configuration/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/kevinblake/hangfire-schedule-configuration</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Hangfire schedule configuration from app.config / web.config</description>
+    <tags>asp.net aspnet hangfire configuration</tags>
+    <dependencies>
+      <dependency id="Hangfire.Core" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="Hangfire.ScheduleConfiguration\bin\Release\Hangfire.ScheduleConfiguration.dll" target="lib\net40" />
+  </files>
+</package>
+

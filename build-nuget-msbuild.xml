@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Package">
+
+  <PropertyGroup>
+    <MSBuildNuGetTasksLib>$(MSBuildProjectDirectory)\lib\msbuild\MSBuild.NuGet.Tasks.dll</MSBuildNuGetTasksLib>
+  </PropertyGroup>
+
+  <UsingTask AssemblyFile="$(MSBuildNuGetTasksLib)" TaskName="MSBuild.NuGet.Tasks.ManifestUpdate" />
+  <UsingTask AssemblyFile="$(MSBuildNuGetTasksLib)" TaskName="MSBuild.NuGet.Tasks.Pack" />
+
+  <PropertyGroup Condition="'$(PackageVersion)' == ''">
+  <PackageVersion>1.0.0.2</PackageVersion>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <ApplicationName>Puzzlebox.Version.Information</ApplicationName>
+    <RootDir>$(MSBuildProjectDirectory)</RootDir>
+    <BuildDir>$(RootDir)\Build</BuildDir>
+    <BuildArtifactsFolder>$(BuildDir)\buildartifacts</BuildArtifactsFolder>
+    <PackageDir>$(BuildArtifactsFolder)\Package</PackageDir>
+    <ToolsDir>$(RootDir)\Tools</ToolsDir>
+
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == ''">
+    <Configuration>Release</Configuration>
+  </PropertyGroup>
+ 
+  <!--
+    ****************************************
+    * TARGETS
+  ****************************************
+  -->
+
+  <!-- CLEAN -->
+  <Target Name="Clean">
+    <RemoveDir Directories="$(BuildArtifactsFolder)" Condition="Exists('$(BuildArtifactsFolder)')" />
+    <RemoveDir Directories="$(PackageDir)" Condition="Exists('$(PackageDir)')" />
+    <MakeDir Directories="$(BuildDir)" />
+    <MakeDir Directories="$(PackageDir)" />  
+  </Target>
+ 
+  <!-- COMPILE -->
+  <Target Name="Compile" DependsOnTargets="Clean">
+  <MSBuild Projects="$(RootDir)\$(ApplicationName).sln" 
+           Targets="Rebuild" 
+           Properties="Configuration=$(Configuration);Platform=Any CPU;OutDir=$(BuildArtifactsFolder)\" />
+  </Target>
+
+  <!-- PREPAIRE FILES -->
+  <Target Name="PrepareFiles" DependsOnTargets="Compile">
+    <ItemGroup>
+      <BinFiles Include="$(BuildArtifactsFolder)\*.dll" Exclude="$(BuildArtifactsFolder)\*.Test.dll;$(BuildArtifactsFolder)\*.Specs.dll;$(BuildArtifactsFolder)\NewtonSoft.Json.dll" />
+      <ContentFiles Include="$(RootDir)\**\*.config.transform" Exclude="$(RootDir)\packages\**\*"  />
+      <PackageFile Include="$(RootDir)\$(ApplicationName).nuspec" />
+    </ItemGroup>
+  <Copy SourceFiles="@(BinFiles)" DestinationFolder="$(BuildArtifactsFolder)\lib\net40" />
+  <Copy SourceFiles="@(ContentFiles)" DestinationFolder="$(BuildArtifactsFolder)\content" />
+  <Copy SourceFiles="@(PackageFile)" DestinationFolder="$(BuildArtifactsFolder)" />
+  </Target>
+
+  <!-- MANIFEST -->
+  <Target Name="Manifest" DependsOnTargets="PrepareFiles">
+  <ItemGroup>
+      <ManifestFiles Include="$(BuildArtifactsFolder)\lib\**\*;$(BuildArtifactsFolder)\content\**\*" Exclude="$(BuildArtifactsFolder)\$(ApplicationName).nuspec" />
+    </ItemGroup>
+    <Message Text="$(BuildArtifactsFolder)\$(ApplicationName).nuspec" />
+    <Message Text="$(BuildArtifactsFolder)" />
+    <Message Text="$(PackageVersion)" />
+    <Message Text="@(ManifestFiles)" />
+  <ManifestUpdate
+    ManifestFile="$(BuildArtifactsFolder)\$(ApplicationName).nuspec"
+    WorkingDirectory="$(BuildArtifactsFolder)"
+    Version="$(PackageVersion)"
+      Files="@(ManifestFiles)" />
+      <Message Text="Updated" />
+  </Target>
+
+  <!-- PACKAGE -->
+  <Target Name="Package" DependsOnTargets="Manifest">
+  <Pack NuGetExePath="$(RootDir)\.nuget\NuGet.exe"
+    ManifestFile="$(BuildArtifactsFolder)\$(ApplicationName).nuspec"
+    BasePath="$(BuildArtifactsFolder)"
+    OutputDirectory="$(PackageDir)"
+    Verbose="true" />
+  </Target>
+
+</Project>
