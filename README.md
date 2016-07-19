@@ -21,3 +21,22 @@ Hangfire schedule configuration from app.config / web.config
         </tasks>
       </startupTasks>
     </configuration>
+
+## Code
+
+This can go right after setting JobStorage.Current as part of your Hangfire bootstrapper
+
+    var scheduledconfig = ConfigurationManager.GetSection("scheduledTasks") as TaskSection;
+    if (scheduledconfig == null)
+    {
+      return;
+    }
+    
+    scheduledconfig.Initialise();
+    
+    var startupConfig = ConfigurationManager.GetSection("startupTasks") as TaskSection;
+    if (startupConfig == null)
+    {
+      return;
+    }
+    startupConfig.Enqueue();
