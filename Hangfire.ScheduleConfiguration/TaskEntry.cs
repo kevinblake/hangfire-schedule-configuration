@@ -20,7 +20,7 @@ namespace Hangfire.ScheduleConfiguration
             set { base["type"] = value; }
         }
 
-        [ConfigurationProperty("cron", IsKey = false, IsRequired = true)]
+        [ConfigurationProperty("cron", IsKey = false, IsRequired = false)]
         public string Cron
         {
             get { return (string) base["cron"]; }
